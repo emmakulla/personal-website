@@ -16,5 +16,3 @@ A two-page personal website built with HTML, CSS, JavaScript, and D3.js.
 4. Open **Settings → Pages**. Under **Build and deployment**, select **Deploy from a branch**, branch **main**, folder **/(root)**, then **Save**.
 5. Visit `https://YOUR-USERNAME.github.io/personal-website/` (replace the username and repository name).
 6. Check the Home page, My Interests & Skills page, email link, and D3 chart. The chart needs an internet connection to load D3 from its CDN.
-
-This site uses relative paths (`interests.html`, `chart.js`, `assets/...`) so it can work in a GitHub Pages project repository. Please review the bio and contact email to ensure they describe what you want to share publicly.
