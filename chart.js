@@ -1,53 +1,44 @@
-// A real, interactive D3.js chart. Counts indicate tools mentioned, not proficiency.
-const skillsData = [
-  { category: 'Data analysis', tools: ['Python', 'SQL', 'Excel'], color: '#285a46' },
-  { category: 'Data visualization', tools: ['Altair', 'Plotly', 'Matplotlib', 'Power BI'], color: '#dc8d76' },
-  { category: 'Business & workflow', tools: ['SAP ERP', 'Git', 'PowerPoint'], color: '#82a994' }
+// Interactive D3.js timeline of Emma's academic, work, and leadership journey.
+// The final 2027 milestone is upcoming, not a completed experience.
+const milestones = [
+  {year:'2025', date:'August 2025', title:'Resident Assistant', category:'Leadership', color:'#dc8d76', detail:'Started supporting residential communities and organizing student events at Northeastern.'},
+  {year:'2026', date:'January 2026', title:'Fiduciary Trust', category:'Finance', color:'#285a46', detail:'Cash Management Co-op: worked with daily payments, reconciliations, and reporting.'},
+  {year:'2026', date:'Summer 2026', title:'ASML', category:'Data & operations', color:'#779a8c', detail:'Product Lifecycle Management internship: analyzed inventory planning and presented recommendations.'},
+  {year:'2027', date:'January 2027 · Upcoming', title:'Arrowstreet Capital', category:'Next chapter', color:'#bc9b67', detail:'Upcoming Investment Services Co-op, combining an interest in markets with analytical and operational work.'}
 ];
 
-function drawSkillsChart() {
-  const chart = d3.select('#skills-chart');
-  chart.selectAll('*').remove();
-  const width = 880;
-  const height = 330;
-  const margin = { top: 32, right: 48, bottom: 60, left: 190 };
-  const plotWidth = width - margin.left - margin.right;
-  const plotHeight = height - margin.top - margin.bottom;
-  const svg = chart.append('svg').attr('viewBox', `0 0 ${width} ${height}`)
-    .attr('aria-hidden', 'true');
-  const plot = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
-  const x = d3.scaleLinear().domain([0, 5]).range([0, plotWidth]);
-  const y = d3.scaleBand().domain(skillsData.map(d => d.category)).range([0, plotHeight]).padding(0.32);
-  plot.append('g').attr('class', 'grid').call(d3.axisBottom(x).ticks(5).tickSize(plotHeight).tickFormat(''))
-    .selectAll('line').attr('stroke', '#e7ece7');
-  plot.select('.grid .domain').remove();
-  plot.append('g').call(d3.axisLeft(y).tickSize(0)).call(g => g.select('.domain').remove())
-    .selectAll('text').attr('fill', '#344a3d').attr('font-size', 16).attr('font-family', 'DM Sans, sans-serif').attr('dx', -12);
-  plot.append('g').attr('transform', `translate(0,${plotHeight})`).call(d3.axisBottom(x).ticks(5).tickSize(0))
-    .call(g => g.select('.domain').attr('stroke', '#b8c6ba'))
-    .selectAll('text').attr('fill', '#6b7b71').attr('font-size', 13).attr('dy', 15);
-  svg.append('text').attr('x', margin.left + plotWidth / 2).attr('y', height - 6).attr('text-anchor', 'middle')
-    .attr('font-family', 'DM Sans, sans-serif').attr('font-size', 13).attr('fill', '#64786b').text('Number of tools listed');
-  const bars = plot.selectAll('.skill-bar').data(skillsData).enter().append('rect')
-    .attr('class', 'skill-bar').attr('x', 0).attr('y', d => y(d.category)).attr('height', y.bandwidth())
-    .attr('rx', 7).attr('width', d => x(d.tools.length)).attr('fill', d => d.color)
-    .attr('tabindex', 0).attr('role', 'button')
-    .attr('aria-label', d => `${d.category}: ${d.tools.length} tools. ${d.tools.join(', ')}.`)
-    .style('cursor', 'pointer');
-  plot.selectAll('.count-label').data(skillsData).enter().append('text')
-    .attr('x', d => x(d.tools.length) + 12).attr('y', d => y(d.category) + y.bandwidth() / 2 + 5)
-    .attr('font-family', 'DM Sans, sans-serif').attr('font-weight', 700)
-    .attr('font-size', 16).attr('fill', '#344a3d').text(d => d.tools.length);
-  const detail = d3.select('#chart-detail');
-  function show(d) { detail.text(`${d.category} (${d.tools.length}): ${d.tools.join(' · ')}`); }
-  bars.on('mouseenter', (event, d) => show(d))
-    .on('focus', (event, d) => show(d))
-    .on('click', (event, d) => show(d))
-    .on('keydown', (event, d) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); show(d); } });
+function drawJourneyTimeline() {
+  const mount = d3.select('#skills-chart');
+  mount.selectAll('*').remove();
+  const w=900, h=320, pad=76, lineY=145;
+  const svg=mount.append('svg').attr('viewBox',`0 0 ${w} ${h}`)
+    .attr('role','group').attr('aria-label','Interactive timeline of four career and leadership milestones from 2025 to 2027');
+  const x=d3.scalePoint().domain(d3.range(milestones.length)).range([pad,w-pad]).padding(0.08);
+  svg.append('line').attr('x1',x(0)).attr('x2',x(3)).attr('y1',lineY).attr('y2',lineY)
+    .attr('stroke','#d9e7d7').attr('stroke-width',8).attr('stroke-linecap','round');
+  const points=svg.selectAll('.milestone').data(milestones).enter().append('g')
+    .attr('class','milestone').attr('transform',(d,i)=>`translate(${x(i)},${lineY})`)
+    .attr('tabindex',0).attr('role','button').style('cursor','pointer')
+    .attr('aria-label',d=>`${d.date}, ${d.title}, ${d.category}. ${d.detail}`);
+  points.append('circle').attr('r',33).attr('fill',d=>d.color).attr('opacity',0.12);
+  points.append('circle').attr('class','timeline-dot').attr('r',17).attr('fill',d=>d.color)
+    .attr('stroke','#fff').attr('stroke-width',5);
+  points.append('text').attr('text-anchor','middle').attr('y',-62).attr('font-size',15)
+    .attr('font-weight',700).attr('font-family','DM Sans, sans-serif').attr('fill','#285a46').text(d=>d.year);
+  points.append('text').attr('text-anchor','middle').attr('y',70).attr('font-size',14)
+    .attr('font-weight',700).attr('font-family','DM Sans, sans-serif').attr('fill','#22342e').text(d=>d.title);
+  points.append('text').attr('text-anchor','middle').attr('y',94).attr('font-size',12)
+    .attr('font-family','DM Sans, sans-serif').attr('fill','#66756e').text(d=>d.category);
+  const detail=d3.select('#chart-detail');
+  function selectMilestone(event,d) {
+    points.select('.timeline-dot').transition().duration(180).attr('r',17);
+    d3.select(event.currentTarget).select('.timeline-dot').transition().duration(180).attr('r',24);
+    detail.text(`${d.date} · ${d.title} — ${d.detail}`);
+  }
+  points.on('mouseenter',selectMilestone).on('focus',selectMilestone).on('click',selectMilestone)
+    .on('keydown',(event,d)=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMilestone(event,d);}});
+  detail.text('Hover over, click, or tab to a milestone to explore my journey.');
 }
-
-if (typeof d3 === 'undefined') {
-  document.querySelector('#skills-chart').textContent = 'The chart needs an internet connection to load the D3.js library.';
-} else {
-  drawSkillsChart();
-}
+if(typeof d3==='undefined') {
+  document.querySelector('#skills-chart').textContent='The timeline needs an internet connection to load D3.js.';
+} else { drawJourneyTimeline(); }
